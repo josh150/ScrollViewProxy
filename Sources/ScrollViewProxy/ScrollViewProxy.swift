@@ -1,7 +1,7 @@
 // Created by Casper Zandbergen on 01/06/2020.
 // https://twitter.com/amzdme
 
-import Introspect
+import SwiftUIIntrospect
 import SwiftUI
 import Combine
 
@@ -155,10 +155,12 @@ public struct ScrollViewReader<Content: View>: View {
                 // seems this will not be called due to ScrollView/Preference issues
                 // https://stackoverflow.com/a/61765994/3019595
             }
-            .introspectScrollView {
-                if self.proxy.coordinator.scrollView != $0 {
-                    self.proxy.coordinator.scrollView = $0
-                    self.proxy.offset = $0.offsetPublisher
+			.introspect(.scrollView, on: .iOS(.v15), .iOS(.v16), .iOS(.v17)) { scrollView in
+                if self.proxy.coordinator.scrollView != scrollView {
+					DispatchQueue.main.async {
+						self.proxy.coordinator.scrollView = scrollView
+						self.proxy.offset = scrollView.offsetPublisher
+					}
                 }
             }
     }
@@ -252,4 +254,3 @@ public struct ScrollViewProxy {
         coordinator.frames[id] = geometry.frame(in: .named(space))
     }
 }
-
